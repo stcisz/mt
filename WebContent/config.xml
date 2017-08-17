@@ -23,7 +23,7 @@
         <preference name="Orientation" value="portrait"/>
         <preference name="permissions" value="none"/>
         
-        <access origin="http://www.scripts.stcisz.net/*" />
+        <access origin="http://www.apps.stcisz.net/*" />
 
         
         <icon src="icon.png"/>
