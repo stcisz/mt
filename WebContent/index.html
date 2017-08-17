@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Moon Transits</title>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+			<link rel="stylesheet" href="css/app.min.css">
+			<style>
+				#objects {
+					width: 100%;
+					border: none;
+				}
+			</style>
+	</head>
+
+	<body>
+		<div class="app-page" data-page="home">
+			<div class="app-topbar">
+				<div class="app-button" data-target="configure">Configure</div>
+				<div class="app-title">Moon Transits</div>
+			</div>
+			<div class="app-content">
+				<div class="app-section">
+					<table id="transits"></table>
+				</div>
+			</div>
+		</div>
+
+		<div class="app-page" data-page="configure">
+			<div class="app-topbar">
+				<div class="app-title">Objects settings</div>
+				<div class="app-button right" data-target="home">Transits</div>
+			</div>
+			<div class="app-content">
+				<div class="app-section">
+					<select id="objects" multiple size="7">
+					</select>
+				</div>
+				<div class="app-button" data-target="edit">New</div>
+				<div id="editButton" class="app-button" >Edit</div>
+				<div id="deleteButton" class="app-button" >Delete</div>
+				<div id="loadButton" class="app-button" data-target="load">Load horoscope</div>				
+			</div>
+		</div>
+
+
+		<div class="app-page" data-page="edit">
+			<div class="app-topbar">
+				<div id="saveedit" class="app-button right" >Save</div>
+			<div class="app-title">Object data</div>
+		</div>
+		<div class="app-content">
+			<table>
+				<tr>
+					<td>Object:</td>
+					<td><input type="text" id="object"></input></td>
+				</tr>
+				<tr>	
+					<td>Position degrees:</td>
+					<td><input type="text" id="degrees"></input></td>
+				</tr>
+				<tr>
+					<td>Position sign:</td>
+					<td>
+						<select id="sign">
+							<option value="1">Aries</option>
+							<option value="2">Taurus</option>
+							<option value="3">Gemini</option>
+							<option value="4">Cancer</option>
+							<option value="5">Leo</option>
+							<option value="6">Virgo</option>
+							<option value="7">Libra</option>
+							<option value="8">Scorpio</option>
+							<option value="9">Sagitarius</option>
+							<option value="10">Capricorn<option>
+							<option value="11">Aquarius</option>
+							<option value="12">Pisces</option>
+						</select>
+					</td>
+				</tr>
+				<tr>	
+					<td>Position minutes:</td>
+					<td><input type="text" id="minutes"></input></td>
+				</tr>
+			</table>
+			</br>
+			Sensitive points:<br>
+			<input type="checkbox" id="conjunct">conjunct</input></br>
+			<input type="checkbox" id="opposite">opposite</input></br>
+			<input type="checkbox" id="square">square</input></br>
+			<input type="checkbox" id="trine">trine</input></br>
+			<input type="checkbox" id="sextile">sextile</input></br>
+			<input type="checkbox" id="inconjunct">inconjunct</input></br>
+			<input type="checkbox" id="semisextile">semisextile</input></br>
+		</div>
+	</div>
+
+	<div class="app-page" data-page="load">
+		<div class="app-topbar">
+			<div class="app-button right" id="loadButton">Load</div>
+			<div class="app-title">Horoscope data</div>
+		</div>
+		<div class="app-content">
+			<table>
+				<tr>
+					<td>Prefix</td>
+					<td><input type="text" id="prefix"></input></td>
+				</tr>
+				<tr>
+					<td>Date (day-month-year)</td>
+					<td><input type="text" id="day"></input></td>
+				</tr>
+				<tr>
+					<td>Time (hr:min)</td>
+					<td><input type="text" id="time"></input></td>
+				</tr>
+				<tr>
+					<td>Zone (hr:min))</td>
+					<td><input type="text" id="zone"></input></td>
+				</tr>
+				<tr>
+					<td>Longitude (deg[E|W]min)</td>
+					<td><input type="text" id="longitude"></input></td>
+				</tr>
+				<tr>
+					<td>Latitude (deg[N|S]min)</td>
+					<td><input type="text" id="latitude"></input></td>
+				</tr>
+
+			</table>
+		</div>
+	</div>
+		
+	<script type="text/javascript" src="lib/zepto.min.js"></script>
+	<script type="text/javascript" src="lib/app.min.js"></script>
+	<script type="text/javascript" src="lib/taffy-min.js"></script>
+	
+		<script type="text/javascript">
+			
+			
+			var maindb = TAFFY();
+			var thisRecord;
+			
+			function saveRecord() {
+				var record = {
+					object: $("#object").val(),
+					degrees: $("#degrees").val(),
+					sign: $("#sign").val(),
+					minutes: $("#minutes").val(),
+					conjunct: $("#conjunct").prop("checked"),
+					opposite: $("#opposite").prop("checked"),
+					square: $("#square").prop("checked"),
+					trine: $("#trine").prop("checked"),
+					sextile: $("#sextile").prop("checked"),
+					inconjunct: $("#inconjunct").prop("checked"),
+					semisextile: $("#semisextile").prop("checked")
+				};
+				if (record["object"] != "" && record["degrees"] != "" && record["minutes"] != "") {
+					maindb().filter({object: record["object"]}).remove();
+					maindb.insert(record);
+					App.load("configure");
+					return;
+				} 
+				var r = confirm("Object is not configured. Continue?");
+				if (r) {
+					return;
+				}
+				App.load("configure");				
+			}
+			
+			function computePositions() {
+				pos = TAFFY();
+				maindb().each(function(record,recordnumber) {
+					var deg = parseInt(record["degrees"]) + 
+						(parseInt(record["sign"]) - 1) * 30 + 
+						parseInt(record["minutes"]) / 60.0;
+					if (record.conjunct) {
+						pos.insert({
+							degree: deg,
+							aspect: "conjunct",
+							object: record["object"]
+						});
+					}
+					if (record.opposite) {
+						pos.insert({
+							degree: roundDeg(deg + 180),
+							aspect: "opposite",
+							object: record["object"]
+						});
+					}
+					if (record.trine) {
+						pos.insert({
+							degree: roundDeg(deg + 120),
+							aspect: "trine",
+							object: record["object"]
+						});
+						pos.insert({
+							degree: roundDeg(deg - 120),
+							aspect: "trine",
+							object: record["object"]
+						});
+					}
+					if (record.square) {
+						pos.insert({
+							degree: roundDeg(deg + 90),
+							aspect: "square",
+							object: record["object"]
+						});
+						pos.insert({
+							degree: roundDeg(deg - 90),
+							aspect: "square",
+							object: record["object"]
+						});
+					}
+					if (record.sextile) {
+						pos.insert({
+							degree: roundDeg(deg + 60),
+							aspect: "sextile",
+							object: record["object"]
+						});
+						pos.insert({
+							degree: roundDeg(deg - 60),
+							aspect: "sextile",
+							object: record["object"]
+						});
+					}
+					if (record.inconjunct) {
+						pos.insert({
+							degree: roundDeg(deg + 150),
+							aspect: "inconjunct",
+							object: record["object"]
+						});
+						pos.insert({
+							degree: roundDeg(deg - 150),
+							aspect: "inconjunct",
+							object: record["object"]
+						});
+					}
+					if (record.semisextile) {
+						pos.insert({
+							degree: roundDeg(deg + 30),
+							aspect: "semisextile",
+							object: record["object"]
+						});
+						pos.insert({
+							degree: roundDeg(deg - 30),
+							aspect: "semisextile",
+							object: record["object"]
+						});
+					}
+				});
+				return pos;
+			}
+
+			dataLong = [
+			0,	0,	1,	0,	6288774,
+			2,	0,	-1,	0,	1274027,
+			2,	0,	0,	0,	658314,
+			0,	0,	2,	0,	213618,
+			0,	1,	0,	0,	-185116,
+			0,	0,	0,	2,	-114332,
+			2,	0,	-2,	0,	58793,
+			2,	-1,	-1,	0,	57066,
+			2,	0,	1,	0,	53322,
+			2,	-1,	0,	0,	45758,
+			0,	1,	-1,	0,	-40923,
+			1,	0,	0,	0,	-34720,
+			0,	1,	1,	0,	-30383,
+			2,	0,	0,	-2,	15327,
+			0,	0,	1,	2,	-12528,
+			0,	0,	1,	-2,	10980,
+			4,	0,	-1,	0,	10675,
+			0,	0,	3,	0,	10034,
+			4,	0,	-2,	0,	8548,
+			2,	1,	-1,	0,	-7888,
+			2,	1,	0,	0,	-6766,
+			1,	0,	-1,	0,	-5163,
+			1,	1,	0,	0,	4987,
+			2,	-1,	1,	0,	4036,
+			2,	0,	2,	0,	3994,
+			4,	0,	0,	0,	3861,
+			2,	0,	-3,	0,	3665,
+			0,	1,	-2,	0,	-2689,
+			2,	0,	-1,	2,	-2602,
+			2,	-1,	-2,	0,	2390,
+			1,	0,	1,	0,	-2348,
+			2,	-2,	0,	0,	2236,
+			0,	1,	2,	0,	-2120,
+			0,	2,	0,	0,	-2069,
+			2,	-2,	-1,	0,	2048,
+			2,	0,	1,	-2,	-1773,
+			2,	0,	0,	2,	-1595,
+			4,	-1,	-1,	0,	1215,
+			0,	0,	2,	2,	-1110,
+			3,	0,	-1,	0,	-892,
+			2,	1,	1,	0,	-810,
+			4,	-1,	-2,	0,	759,
+			0,	2,	-1,	0,	-713,
+			2,	2,	-1,	0,	-700,
+			2,	1,	-2,	0,	691,
+			2,	-1,	0,	-2,	596,
+			4,	0,	1,	0,	549,
+			0,	0,	4,	0,	537,
+			4,	-1,	0,	0,	520,
+			1,	0,	-2,	0,	-487,
+			2,	1,	0,	-2,	-399,
+			0,	0,	2,	-2,	-381,
+			1,	1,	1,	0,	351,
+			3,	0,	-2,	0,	-340,
+			4,	0,	-3,	0,	330,
+			2,	-1,	2,	0,	327,
+			0,	2,	1,	0,	-323,
+			1,	1,	-1,	0,	299,
+			2,	0,	3,	0,	294
+			]
+
+			function julianDay(Y,M,D,h,z,m) {
+				JD = 367 * Y - Math.floor(7*(Y + Math.floor((M + 9) / 12)) / 4) + Math.floor(275 * M / 9) + D- 730531.5
+				Ti = h/24 -z/24 + m/(60 * 24);
+				return JD + Ti;
+			}
+			
+			function round(x) {
+				v = x % 360;
+				return v < 0 ? v + 360: v;
+			}
+			
+			function roundDeg(x) {
+				while (x < 0) {
+					x += 369;
+				}
+				return x % 360;
+			}
+			
+			function between(beg,end,pos) {
+				var pbeg = beg % 360.0;
+				var pend = end % 360.0;
+				var p = pos % 360.0;
+				if (pbeg > 180.0 && pend < 180.0) {
+					return p >= pbeg || p < pend;
+				} else {
+					return pbeg <= p && p < pend; 
+				}
+			}
+			
+			function moonPos(jdate) {
+				Ti = jdate / 36525
+				T2 = Ti*Ti
+				T3 = Ti*Ti*Ti
+				T4 = Ti*Ti*Ti*Ti
+				var LPrim = round(218.3164591 + 481267.88134236 * Ti - 0.0013268 * T2 +
+							T3 / 538841 - T4 / 65194000);
+				var D = round(297.8502042 + 445267.1115168 * Ti - 0.00163 * T2 + 
+						T3 / 545868 - T4 / 113065000);
+				var M = round(357.5291092 + 35999.0502909 * Ti - 0.0001536 * T2 +
+						 T3 / 24490000);
+				var MPrim = round(134.9634114 + 477198.8676313 * Ti + 0.008997 * T2 + 
+						T3 / 69699 - T4 / 14712000);
+				var F = round(93.2720993 + 483202.0175273 * Ti - 0.0034029 * T2 + 
+						T3 / 3526000 - T4 / 863310000);
+				var A1 = round(119.75 + 131.849 * Ti);
+				var A2 = round(53.09 + 479264.29 * Ti);
+				var E = 1 - 0.002516 * Ti - 0.0000074 * T2;
+				var E2 = E * E;
+				var LSum = 0
+				for (var i = 0; i < 59 * 5; i+= 5) {
+					arg = D * dataLong[i] + M * dataLong[i+1] + MPrim * dataLong[i+2] + dataLong[i+3] * F
+					_sin = Math.sin(arg * Math.PI / 180);
+					if (Math.abs(dataLong[i+1]) == 1) {
+						_sin *= E;
+					}
+					if (Math.abs(dataLong[i+1]) == 2) {
+						_sin *= E2;
+					}
+					LSum += dataLong[i+ 4] * _sin
+				}
+				LSum += 3958 * Math.sin(A1 * Math.PI / 180) +
+						1962 * Math.sin((LPrim - F) * Math.PI / 180) +
+						318 * Math.sin(A2 * Math.PI /180);
+				L = round(LPrim + LSum / 1000000);
+				return L;
+			}
+
+			function getDate(x0, val) {
+				var x1 = x0;
+				var x2 = x0 + 0.01;
+				for (var i = 0; i < 100; i++) {
+					var y1 = moonPos(x1) - val;
+					var y2 = moonPos(x2) - val; 
+					if (y1 < -180) y1 += 360;
+					if (y1 > 180) y1 -= 360;
+					if (y2 < -180) y2 += 360;
+					if (y2 > 180) y2 -= 360;
+					var t = x2 + (-y2) *  (x2 - x1) / (y2 - y1);
+					x1 = x2;
+					x2 = t;
+					if (Math.abs(y2) < 0.0000001) break;
+				}
+				return Math.floor(x2 * (24 * 60 * 60 * 1000));
+			}
+
+			function currentPos() {
+				var day = new Date();
+ 				var jdate = julianDay(day.getFullYear(),day.getMonth()+1,day.getDate(),day.getHours(),-day.getTimezoneOffset()/60,day.getMinutes());
+ 				return [jdate, moonPos(jdate)];
+			}
+
+			function computePart(begin, end, position) {
+				position().filter(function() {
+					return ! between(begin,end,this.degree);
+				}).remove();
+				return position;
+			}
+			
+			function setDates(positions, objectPos) {
+				result = TAFFY();
+				positions().each(function(record, recordnumber) {
+					var resultObj = {
+						object: record["object"],
+						aspect: record["aspect"],
+						time: getDate(objectPos, record["degree"])
+					};
+					result.insert(resultObj);
+				});
+				return result;
+			}
+			
+			function showSelected(selected) {
+				$("#transits").empty();
+				selected().order("time").each(function(record, recordnumber) {
+					var item = $("<tr/>");
+					item.append($("<td/>").text(record.aspect));
+					item.append($("<td/>").text(record["object"]));
+					var jd2000 = new Date(2000, 0, 1, 12, 0, 0, 0);
+					var evDate = new Date(record["time"] + jd2000.getTime() 
+						- jd2000.getTimezoneOffset() * 60 * 1000);
+					item.append($("<td/>").text(evDate.toLocaleString()));
+					$("#transits").append(item);
+				});
+			}
+
+			window.onload = function() {
+				maindb.store("maindb");
+			}
+			
+			window.onexit = function() {
+				maindb.store("maindb");
+			}			
+				
+			App.controller('home', function (page) {
+				$(page).on("appReady", function() {
+					var positions = computePositions();
+ 					var deg = currentPos();
+					var selected = computePart(roundDeg(deg[1] - 15), roundDeg(deg[1] + 15), positions);
+					var timeset = setDates(selected, deg[0]);
+					showSelected(timeset); 
+				})
+			});
+
+			App.controller('configure', function (page) {
+				$(page).on("appReady", function() {
+					$("#objects").empty();
+					maindb().order("object").each(function(record, recordnumber) {
+						var item = $("<option/>").attr("value",record["object"]).text(record["object"]);
+						$("#objects").append(item);
+					});
+					first = maindb().order("object").first();
+					$("#objects").val(first["object"]);
+					
+					$("#editButton").on("click", function() {
+						var selected = $("#objects").val();
+						thisRecord = maindb({object: selected}).first();
+						App.load("edit");
+					});
+					$("#deleteButton").on("click", function() {
+						var selected = $("#objects").val();
+						maindb().filter({object: selected}).remove();
+						$("#objects").empty();
+						maindb().order("object").each(function(record, recordnumber) {
+							var item = $("<option/>").attr("value",record["object"]).text(record["object"]);
+							$("#objects").append(item);
+						});
+						first = maindb().order("object").first();
+						$("#objects").val(first["object"]);
+					})
+				});
+			});
+
+			App.controller('edit', function (page) {
+				$(page).on("appReady", function() {
+					$("#saveedit").on("click", saveRecord);
+				});
+
+				$(page).on("appShow", function() {
+					if (thisRecord == undefined) {
+						return;
+					}
+					$("#object").val(thisRecord["object"]);
+					$("#degrees").val(thisRecord["degrees"]);
+					$("#sign").val(thisRecord["sign"]);
+					$("#minutes").val(thisRecord["minutes"]),
+					$("#conjunct").prop("checked",thisRecord["conjunct"]);
+					$("#opposite").prop("checked",thisRecord["opposite"]);
+					$("#square").prop("checked", thisRecord["square"]);
+					$("#trine").prop("checked",thisRecord["trine"]);
+					$("#sextile").prop("checked", thisRecord["sextile"]);
+					$("#inconjunct").prop("checked",thisRecord["inconjunct"]);
+					$("#semisextile").prop("checked",thisRecord["semisextile"]);
+					thisRecord = undefined;
+				});
+			});
+
+			App.controller("load", function(page) {
+				$(page).on("appReady", function() { 
+					$("#loadButton").on("click", function() {
+						var prefix = $("#prefix").val();
+						var dateList = $("#day").val().split("-");
+						if (dateList.length < 3) {
+							var r = confirm("Data is not set Continue?");
+							if (r) {
+								return;
+							} else {
+								App.load("configure");
+								return;
+							}
+						}
+						var day = parseInt(dateList[0]);
+						var month =  parseInt(dateList[1]);
+						var year = parseInt(dateList[2]);
+						
+						var timeList = $("#time").val().split(":");
+						if (timeList.length != 2) {
+							var r = confirm("Time is not set. Continue?");
+							if (r) {
+								return;
+							} else {
+								App.load("configure");
+								return;
+							}							
+						}
+						var hour = parseInt(timeList[0]);
+						var minut = parseInt(timeList[1]);
+						
+						var zoneList = $("#zone").val().split(":");
+						if (zoneList.length != 1 && zoneList.length != 2) {
+							var r = confirm("Zone is not set. Continue?")
+							if (r) {
+								return;
+							} else {
+								App.load("configure");
+								return;
+							}
+						}
+						var zone_hour = parseInt(zoneList[0]);
+						if (zoneList == 2) {
+							var zone_min = parseInt(zoneList[1]);
+						} else {
+							var zone_min = 0;
+						}
+						var zone = zone_hour + (zone_hour > 0 ? 1 : -1) * zone_min / 60;
+						var rxLong = /(-?\d+)(E|W)(\d+)/;
+						var machLong = $("#longitude").val().match(rxLong)
+						if (machLong.length != 4) {
+							var r  =confirm("Longitude is not set. Continue?")
+							if (r) {
+								return;
+							} else {
+								App.load("configure");
+								return;
+							}
+						}							
+						var longitude = (machLong[2] == "E" ? 1 : -1) * 
+							(parseInt(machLong[1]) + parseInt(machLong[3]) / 60.0);
+						var rxLatd = /(-?\d+)(N|S)(\d+)/;						
+						var machLatd = $("#latitude").val().match(rxLatd)
+						if (machLatd.length != 4) {
+							var r = confirm("Longitude is not set. Continue?")
+							if (r) {
+								return;
+							} else {
+								App.load("configure");
+								return;
+							}
+						}							
+						
+						var latitude = (machLatd[2] == "N" ? 1 : -1) * 
+							(parseInt(machLatd[1]) + parseInt(machLatd[3]) / 60.0);
+						var jTime = julianDay(year,month,day,hour,zone,minut) + 2451545;
+						
+						var query = "http://www.apps.stcisz.net/cgi-bin/star.cgi?jd=" + jTime + 
+								"&lon=" + longitude + "&lat=" + latitude + "&callback=?";
+						$.getJSON(query, function(data) {
+								for (key in data) {
+									if (!key.startsWith("house")) {
+											record = {
+												object: prefix + key,
+												degrees: Math.floor(data[key] % 30).toString(),
+												sign: (Math.floor(data[key] / 30) + 1).toString(),
+												minutes: Math.floor((data[key] - Math.floor(data[key])) * 60).toString(),
+												conjunct: true,
+												opposite: true,
+												square: false,
+												trine: false,
+												sextile: false,
+												inconjunct: false,
+												semisextile: false};
+									} else {
+											record = {
+												object: prefix + key,
+												degrees: Math.floor(data[key] % 30).toString(),
+												sign: (Math.floor(data[key] / 30) + 1).toString(),
+												minutes: Math.floor((data[key] - Math.floor(data[key])) * 60).toString(),
+												conjunct: true,
+												opposite: false,
+												square: false,
+												trine: false,
+												sextile: false,
+												inconjunct: false,
+												semisextile: false};										
+									}
+									maindb().filter({object: record["object"]}).remove();
+									maindb.insert(record);
+								}
+								App.load("configure");
+						});
+					});
+				});
+			});
+
+			App.load('home');
+		
+		</script>
+	</body>
+</html>
