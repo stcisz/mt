@@ -23,8 +23,10 @@
         <preference name="Orientation" value="portrait"/>
         <preference name="permissions" value="none"/>
         
+        <gap:plugin name="com.indigoway.cordove.whitelist.whitelistplugin" />
         <access origin="http://www.apps.stcisz.net/*" />
 
+        <feature name="http://api.phonegap.com/1.0/network" />
         
         <icon src="icon.png"/>
 
