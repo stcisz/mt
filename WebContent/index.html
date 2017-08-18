@@ -3,7 +3,7 @@
 	<head>
 		<title>Moon Transits</title>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-			<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://www.apps.stcisz.net">
+			<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://www.apps.stcisz.net">
 			<link rel="stylesheet" href="css/app.min.css">
 			<style>
 				#objects {
@@ -561,7 +561,7 @@
 							var zone_min = 0;
 						}
 						var zone = zone_hour + (zone_hour > 0 ? 1 : -1) * zone_min / 60;
-						var rxLong = /(\d+)(E|W)(\d+)/;
+						var rxLong = /(\d+)([eEwW])(\d+)/;
 						var machLong = $("#longitude").val().match(rxLong)
 						if (machLong == null || machLong.length != 4) {
 							var r = confirm("Longitude is not set. Continue?")
@@ -574,7 +574,7 @@
 						}							
 						var longitude = ((machLong[2] == "E" || machLong[2] == "e") ? 1 : -1) * 
 							(parseInt(machLong[1]) + parseInt(machLong[3]) / 60.0);
-						var rxLatd = /(\d+)(N|S)(\d+)/;						
+						var rxLatd = /(\d+)([NnSs])(\d+)/;						
 						var machLatd = $("#latitude").val().match(rxLatd)
 						if (machLatd == null || machLatd.length != 4) {
 							var r = confirm("Latitude is not set. Continue?")
@@ -586,13 +586,17 @@
 							}
 						}							
 						
-						var latitude = ((machLatd[2] == "N" || macjLatd == "n") ? 1 : -1) * 
+						var latitude = ((machLatd[2] == "N" || macjLatd[2] == "n") ? 1 : -1) * 
 							(parseInt(machLatd[1]) + parseInt(machLatd[3]) / 60.0);
 						var jTime = julianDay(year,month,day,hour,zone,minut) + 2451545;
 						
 						var query = "http://www.apps.stcisz.net/cgi-bin/star.cgi?jd=" + jTime + 
 								"&lon=" + longitude + "&lat=" + latitude + "&callback=?";
-						$.getJSON(query, function(data) {
+						$.ajax({
+							type: "GET",
+							dataType: "jsonp",
+							url: query, 
+							success: function(data) {
 								for (key in data) {
 									if (!key.startsWith("house")) {
 											record = {
@@ -625,6 +629,10 @@
 									maindb.insert(record);
 								}
 								App.load("configure");
+							},
+							error: function(data) {
+								alert(data);
+							}
 						});
 					});
 				});
