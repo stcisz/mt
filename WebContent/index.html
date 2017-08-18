@@ -117,7 +117,7 @@
 					<td><input type="text" id="time"></input></td>
 				</tr>
 				<tr>
-					<td>Zone (hr:min))</td>
+					<td>Zone (hr{:min}))</td>
 					<td><input type="text" id="zone"></input></td>
 				</tr>
 				<tr>
@@ -561,7 +561,7 @@
 							var zone_min = 0;
 						}
 						var zone = zone_hour + (zone_hour > 0 ? 1 : -1) * zone_min / 60;
-						var rxLong = /(-?\d+)(E|W)(\d+)/;
+						var rxLong = /(\d+)(E|W)(\d+)/;
 						var machLong = $("#longitude").val().match(rxLong)
 						if (machLong == null || machLong.length != 4) {
 							var r = confirm("Longitude is not set. Continue?")
@@ -572,12 +572,12 @@
 								return;
 							}
 						}							
-						var longitude = (machLong[2] == "E" ? 1 : -1) * 
+						var longitude = ((machLong[2] == "E" || machLong[2] == "e") ? 1 : -1) * 
 							(parseInt(machLong[1]) + parseInt(machLong[3]) / 60.0);
-						var rxLatd = /(-?\d+)(N|S)(\d+)/;						
+						var rxLatd = /(\d+)(N|S)(\d+)/;						
 						var machLatd = $("#latitude").val().match(rxLatd)
 						if (machLatd == null || machLatd.length != 4) {
-							var r = confirm("Longitude is not set. Continue?")
+							var r = confirm("Latitude is not set. Continue?")
 							if (r) {
 								return;
 							} else {
@@ -586,7 +586,7 @@
 							}
 						}							
 						
-						var latitude = (machLatd[2] == "N" ? 1 : -1) * 
+						var latitude = ((machLatd[2] == "N" || macjLatd == "n") ? 1 : -1) * 
 							(parseInt(machLatd[1]) + parseInt(machLatd[3]) / 60.0);
 						var jTime = julianDay(year,month,day,hour,zone,minut) + 2451545;
 						

@@ -25,9 +25,9 @@
         
         <gap:plugin name="cordova-plugin-whitelist" source="npm" />
         
-        <access origin="http://www.apps.stcisz.net" />
-		<allow-navigation href="http://www.apps.stcisz.net" />
-		<allow-intent href="http://www.apps.stcisz.net" />
+        <access origin="http://www.apps.stcisz.net/cgi-bin/*" />
+		<allow-navigation href="http://www.apps.stcisz.net/cgi-bin/*" />
+		<allow-intent href="http://www.apps.stcisz.net/cgi-bin/*" />
 
         <feature name="http://api.phonegap.com/1.0/network" />
         
