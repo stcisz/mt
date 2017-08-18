@@ -23,8 +23,9 @@
         <preference name="Orientation" value="portrait"/>
         <preference name="permissions" value="none"/>
         
-        <plugin name="com.indigoway.cordova.whitelist.whitelistplugin" spec="1.1.1" source="pgb" />
         <access origin="http://www.apps.stcisz.net/*" />
+		<allow-navigation href="http://www.apps.stcisz.net/*" />
+		<allow-intent href="http://www.apps.stcisz.net/*" />
 
         <feature name="http://api.phonegap.com/1.0/network" />
         
