@@ -22,10 +22,12 @@
         
         <preference name="Orientation" value="portrait"/>
         <preference name="permissions" value="none"/>
-                
-        <access origin="http://www.apps.stcisz.net/cgi-bin/*" />
-		<allow-navigation href="http://www.apps.stcisz.net/cgi-bin/*" />
-		<allow-intent href="http://www.apps.stcisz.net/cgi-bin/*" />
+        
+        <gap:plugin name="cordova-plugin-whitelist" source="npm" />
+        
+        <access origin="*" />
+		<allow-navigation href="*" />
+		<allow-intent href="*" />
 
         <feature name="http://api.phonegap.com/1.0/network" />
         
