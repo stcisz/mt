@@ -591,6 +591,12 @@
 						
 						var query = "http://www.apps.stcisz.net/cgi-bin/star.cgi?jd=" + jTime + 
 								"&lon=" + longitude + "&lat=" + latitude + "&callback=?";
+						
+						$(document).on('ajaxBeforeSend', function(e, xhr, options){
+							options.async = true;
+							return true;
+						;})
+						
 						$.getJSON(query, 
 							function(data) {
 								for (key in data) {
