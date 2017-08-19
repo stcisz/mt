@@ -518,7 +518,7 @@
 						var prefix = $("#prefix").val();
 						var dateList = $("#day").val().split("-");
 						if (dateList.length < 3) {
-							var r = confirm("Data is not set Continue?");
+							var r = confirm("Data is not set. Continue?");
 							if (r) {
 								return;
 							} else {
@@ -585,7 +585,7 @@
 							}
 						}							
 						
-						var latitude = ((machLatd[2] == "N" || macjLatd[2] == "n") ? 1 : -1) * 
+						var latitude = ((machLatd[2] == "N" || machLatd[2] == "n") ? 1 : -1) * 
 							(parseInt(machLatd[1]) + parseInt(machLatd[3]) / 60.0);
 						var jTime = julianDay(year,month,day,hour,zone,minut) + 2451545;
 						
