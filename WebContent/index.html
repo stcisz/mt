@@ -593,8 +593,8 @@
 								"&lon=" + longitude + "&lat=" + latitude + "&callback=?";
 						$.getJSON(query, 
 							function(data) {
-								alert(JSON.stringify(data));
 								for (key in data) {
+									alert(key);
 									if (!key.startsWith("house")) {
 											record = {
 												object: prefix + key,
