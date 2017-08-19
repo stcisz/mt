@@ -622,7 +622,9 @@
 												inconjunct: false,
 												semisextile: false};										
 									}
+									alert("1");
 									maindb().filter({object: record["object"]}).remove();
+									alert("2");
 									maindb.insert(record);
 								}
 								App.load("configure");
