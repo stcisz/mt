@@ -595,8 +595,7 @@
 						$.getJSON(query, 
 							function(data) {
 								for (key in data) {
-									alert(key.startsWith("house"));
-									if (!key.startsWith("house")) {
+									if (!key.substr(0,5) == "house") {
 											record = {
 												object: prefix + key,
 												degrees: Math.floor(data[key] % 30).toString(),
