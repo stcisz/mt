@@ -630,8 +630,11 @@
 								}
 								App.load("configure");
 							},
-							error: function(data) {
+							error: function(data, err, text) {
 								alert(JSON.stringify(data));
+								alert(JSON.stringify(err));
+								alert(JSON.stringify(text));
+
 							}
 						});
 					});
