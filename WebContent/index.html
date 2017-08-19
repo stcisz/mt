@@ -593,7 +593,7 @@
 								"&lon=" + longitude + "&lat=" + latitude + "&callback=?";
 						
 						$(document).on('ajaxBeforeSend', function(e, xhr, options){
-							options.async = true;
+							options.async = false;
 							return true;
 						;})
 						
