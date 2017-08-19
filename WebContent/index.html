@@ -596,6 +596,7 @@
 								for (key in data) {
 									alert(key);
 									if (!key.startsWith("house")) {
+											alert("0a");
 											record = {
 												object: prefix + key,
 												degrees: Math.floor(data[key] % 30).toString(),
@@ -609,6 +610,7 @@
 												inconjunct: false,
 												semisextile: false};
 									} else {
+											alert("0b");
 											record = {
 												object: prefix + key,
 												degrees: Math.floor(data[key] % 30).toString(),
