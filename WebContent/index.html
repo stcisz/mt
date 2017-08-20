@@ -429,14 +429,24 @@
 			
 			function showSelected(selected) {
 				$("#transits").empty();
+				var currentDay = null;
 				selected().order("time").each(function(record, recordnumber) {
 					var item = $("<tr/>");
-					item.append($("<td/>").text(record.aspect));
-					item.append($("<td/>").text(record["object"]));
+					
 					var jd2000 = new Date(2000, 0, 1, 12, 0, 0, 0);
 					var evDate = new Date(record["time"] + jd2000.getTime() 
 						- jd2000.getTimezoneOffset() * 60 * 1000);
-					item.append($("<td/>").text(evDate.toLocaleString()));
+					if (currentDay != evDate.toLocaleDateString()) {
+						item.append($("<td />").attr("colspan", 2).text(evDate.toLocaleDateString()));
+						item.append($("<td/>"));
+						$("#transits").append(item);
+						item = $("<tr/>");
+						currentDay = evDate.toLocaleDateString()
+					} 
+					item.append($("<td/>").text(record.aspect));
+					item.append($("<td/>").text(record["object"]));
+					item.append($("<td/>").text(evDate.toLocaleTimeString()));
+					
 					$("#transits").append(item);
 				});
 			}
