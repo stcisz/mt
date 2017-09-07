@@ -410,7 +410,7 @@
 			function computePart(begin, end, position) {
 				position().filter(function() {
 					return ! between(begin,end,this.degree);
-				}).remove
+				}).remove();
 				return position;
 			}
 			
